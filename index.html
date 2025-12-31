@@ -22,7 +22,12 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            cursor: crosshair;
+            cursor: none; /* Hide default cursor for desktop style */
+        }
+
+        /* Re-enable pointer cursor for interactive elements so mobile users know where to tap */
+        button, a, .control-btn {
+            cursor: pointer; 
         }
 
         body {
@@ -30,6 +35,35 @@
             color: #000;
             font-family: 'Space Grotesk', sans-serif;
             overflow-x: hidden;
+        }
+
+        /* --- CUSTOM CURSOR (Hidden on touch devices usually, but good for desktop) --- */
+        .cursor-dot,
+        .cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #000;
+        }
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #000;
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+        
+        body:active .cursor-outline {
+            width: 20px;
+            height: 20px;
+            background-color: var(--hot-pink);
         }
 
         /* --- TYPOGRAPHY --- */
@@ -43,6 +77,17 @@
             font-size: 1.1rem;
             line-height: 1.5;
             margin-bottom: 1rem;
+        }
+
+        /* --- SCROLL ANIMATIONS --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         /* --- UTILITIES --- */
@@ -244,49 +289,146 @@
             margin: 80px auto;
             border: var(--border);
             box-shadow: 20px 20px 0px var(--neon-green);
+            position: relative;
         }
 
         .slide {
-            height: 400px;
+            height: 450px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             color: white;
             text-align: center;
             background-size: cover;
             background-position: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1;
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 2;
+            max-width: 80%;
         }
         
         .slide h2 {
             font-size: 4rem;
+            margin-bottom: 10px;
             text-shadow: 4px 4px 0 #000;
             -webkit-text-stroke: 2px #000;
         }
 
+        .slide p {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            background: #000;
+            display: inline-block;
+            padding: 10px;
+            transform: rotate(-2deg);
+            border: 1px solid var(--electric-blue);
+        }
+
+        /* --- GAME SECTION --- */
+        .game-section {
+            background: #000;
+            color: #fff;
+            padding: 50px 20px;
+            text-align: center;
+            border-top: var(--border);
+        }
+
+        #gameCanvas {
+            background: #222;
+            border: 2px solid var(--neon-green);
+            display: block;
+            margin: 20px auto;
+            max-width: 100%; /* Makes canvas responsive on mobile */
+            height: auto;
+            cursor: crosshair;
+        }
+        
+        .start-btn {
+            background: var(--hot-pink);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-top: 10px;
+            border: 2px solid #fff;
+        }
+
+        /* Mobile Controls */
+        .mobile-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            background: var(--electric-blue);
+            color: #000;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            /* Hide on desktop, show on mobile/tablet if preferred, 
+               but here we keep it visible for everyone to ensure functionality */
+        }
+
+        .control-btn:active {
+            background: #fff;
+            transform: scale(0.9);
+        }
+
         /* --- FOOTER --- */
         footer {
-            background: #000;
+            background: var(--deep-purple);
             color: var(--neon-green);
             text-align: center;
             padding: 40px;
             font-family: 'VT323', monospace;
+            border-top: var(--border);
         }
 
         @media (max-width: 768px) {
             .hero-content-wrapper { flex-direction: column; }
             .hero-title { font-size: 4rem; }
+            /* Hide custom cursor on mobile */
+            .cursor-dot, .cursor-outline { display: none; }
+            * { cursor: auto; }
         }
     </style>
 </head>
 <body>
 
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
     <header>
         <div class="shape circle"></div>
         <div class="shape square"></div>
         
-        <div class="hero-content-wrapper">
+        <div class="hero-content-wrapper reveal">
             <div class="hero-img-box">
-                <img src="image1.jpg" alt="Jian Martine Gimena">
+                <img src="image6.jpg" alt="Jian Martine Gimena">
             </div>
             
             <div style="text-align: left;">
@@ -305,9 +447,9 @@
     <div class="container">
         <div class="grid-section">
 
-            <div class="card">
+            <div class="card reveal">
                 <div class="card-img">
-                    <img src="image6.jpg" alt="Creative Style">
+                    <img src="image1.jpg" alt="Creative Style">
                 </div>
                 <div class="card-content">
                     <span class="tag">THE WORK</span>
@@ -317,7 +459,7 @@
                 </div>
             </div>
 
-            <div class="card" style="background: var(--deep-purple); color: #fff;">
+            <div class="card reveal" style="background: var(--deep-purple); color: #fff;">
                 <div class="card-img">
                     <img src="image5.jpg" alt="Chill Mode">
                 </div>
@@ -329,7 +471,7 @@
                 </div>
             </div>
 
-            <div class="card" style="background: var(--neon-green);">
+            <div class="card reveal" style="background: var(--neon-green);">
                 <div class="card-img">
                     <img src="momdad.jpg" alt="Throwback">
                 </div>
@@ -337,11 +479,11 @@
                     <span class="tag">THE ORIGIN</span>
                     <h2>Background</h2>
                     <p>Son of <strong>Jay Mark</strong> & <strong>Christine Cabello Gimena</strong>.</p>
-                    <p>Jian balances the rigorous academic life of an SSC scholar with a love for pop culture and design. Whether it's layouting pages or exploring new fandoms, creativity is the core.</p>
+                    <p>Jian's drive for excellence is rooted in a strong family foundation. His parents provide the unwavering support system that fuels his academic success in the SSC program and encourages his creative journey every step of the way.</p>
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card reveal">
                 <div class="card-img">
                     <img src="image2.jpg" alt="Graphic Tee">
                 </div>
@@ -355,7 +497,7 @@
         </div>
     </div>
 
-    <div class="family-section">
+    <div class="family-section reveal">
         <h2 style="font-size: 3rem;">THE SQUAD</h2>
         <div class="family-tree">
             <div class="member">
@@ -384,49 +526,222 @@
         </div>
     </div>
 
-    <div class="container">
-        <div class="slider-wrapper" style="overflow: hidden; position: relative;">
+    <div class="container reveal">
+        <h2 style="text-align: center; margin-top: 50px; margin-bottom: 20px; font-size: 3rem;">THE INSPIRATION</h2>
+        <div class="slider-wrapper" style="overflow: hidden;">
             <div id="slider-track" style="display: flex; transition: transform 0.5s ease-in-out;">
                 
-                <div class="slide" style="min-width: 100%; background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1618944847023-38aa001235f0?q=80&w=1000');">
-                    <h2>HOGWARTS</h2>
+                <div class="slide" style="min-width: 100%; background-image: url('https://images.unsplash.com/photo-1618944847023-38aa001235f0?q=80&w=1000');">
+                    <div class="slide-content">
+                        <h2>HOGWARTS</h2>
+                        <p>A world of ancient stone, hidden chambers, and house pride. Exploring the magic that lies in the details.</p>
+                    </div>
                 </div>
 
-                <div class="slide" style="min-width: 100%; background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000');">
-                    <h2 style="color: #ff0000; text-shadow: 0 0 10px red;">STRANGER THINGS</h2>
+                <div class="slide" style="min-width: 100%; background-image: url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000');">
+                    <div class="slide-content">
+                        <h2 style="color: #ff0000; text-shadow: 0 0 10px red;">STRANGER THINGS</h2>
+                        <p>Neon lights, 80s synth-wave, and the mysteries of the Upside Down. Where friendship is the strongest superpower.</p>
+                    </div>
                 </div>
 
-                <div class="slide" style="min-width: 100%; background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('avatar.jpg');">
-                    <h2 style="color: cyan;">AVATAR</h2>
+                <div class="slide" style="min-width: 100%; background-image: url('avatar.jpg');">
+                    <div class="slide-content">
+                        <h2 style="color: cyan;">AVATAR</h2>
+                        <p>Mastering the four elements. A journey through a world where balance is key, nature speaks, and legends are born.</p>
+                    </div>
                 </div>
 
-                <div class="slide" style="min-width: 100%; background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('dispatch.jpg');">
-                    <h2 style="color: #ffff00;">DISPATCH</h2>
+                <div class="slide" style="min-width: 100%; background-image: url('dispatch.jpg');">
+                    <div class="slide-content">
+                        <h2 style="color: #ffff00;">DISPATCH</h2>
+                        <p>Breaking the news before anyone else. The thrill of the exclusive, the shock of the reveal, and the pulse of the K-pop beat.</p>
+                    </div>
                 </div>
 
             </div>
         </div>
     </div>
 
+    <div class="game-section reveal">
+        <h2>PIXEL RUSH: CREATIVE MODE</h2>
+        <p>Help Jian catch the <strong>Creative Ideas</strong> (Green/Blue Orbs) and avoid the <strong>Art Blocks</strong> (Red Squares)!</p>
+        <p>Use <strong>ARROW KEYS</strong> or <strong>BUTTONS</strong> below.</p>
+        
+        <canvas id="gameCanvas" width="600" height="400"></canvas>
+        
+        <div class="mobile-controls">
+            <button class="control-btn" id="btnLeft">LEFT</button>
+            <button class="control-btn" id="btnRight">RIGHT</button>
+        </div>
+        
+        <button class="start-btn" onclick="startGame()">START GAME</button>
+        <h3 id="scoreDisplay" style="margin-top: 10px;">SCORE: 0</h3>
+    </div>
+
     <footer>
-        <p>JIAN SHONGET PORTFOLIO © 2024</p>
+        <p>MAXIMALIST PORTFOLIO © 2024</p>
         <p>DESIGNED FOR JIAN MARTINE GIMENA</p>
     </footer>
 
     <script>
+        // --- 1. SLIDER LOGIC ---
         let index = 0;
         const track = document.getElementById('slider-track');
-        // Recalculate slides now that there are 4
         const slides = document.querySelectorAll('.slide');
 
         function nextSlide() {
             index++;
-            // Reset index if it exceeds the number of slides (now 4)
             if (index >= slides.length) index = 0;
             track.style.transform = `translateX(-${index * 100}%)`;
         }
+        setInterval(nextSlide, 4000); 
 
-        setInterval(nextSlide, 3000);
+        // --- 2. CUSTOM CURSOR LOGIC ---
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+
+        window.addEventListener('mousemove', function(e) {
+            const posX = e.clientX;
+            const posY = e.clientY;
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+            cursorOutline.style.left = `${posX}px`;
+            cursorOutline.style.top = `${posY}px`;
+        });
+
+        // --- 3. SCROLL REVEAL LOGIC ---
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 150;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal(); // Trigger once on load
+
+        // --- 4. GAME LOGIC ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let gameRunning = false;
+        let score = 0;
+        let player = { x: 275, y: 350, w: 50, h: 50, color: '#00ffff' };
+        let items = []; 
+        let keys = {};
+
+        // Keyboard Controls
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        // Touch/Mouse Controls (For Mobile Buttons)
+        const btnLeft = document.getElementById('btnLeft');
+        const btnRight = document.getElementById('btnRight');
+
+        function handleBtnPress(direction, isPressed) {
+            if(direction === 'left') keys['ArrowLeft'] = isPressed;
+            if(direction === 'right') keys['ArrowRight'] = isPressed;
+        }
+
+        // Add event listeners for both touch and mouse (for hybrid devices)
+        ['mousedown', 'touchstart'].forEach(evt => 
+            btnLeft.addEventListener(evt, (e) => { e.preventDefault(); handleBtnPress('left', true); })
+        );
+        ['mouseup', 'mouseleave', 'touchend'].forEach(evt => 
+            btnLeft.addEventListener(evt, (e) => { e.preventDefault(); handleBtnPress('left', false); })
+        );
+
+        ['mousedown', 'touchstart'].forEach(evt => 
+            btnRight.addEventListener(evt, (e) => { e.preventDefault(); handleBtnPress('right', true); })
+        );
+        ['mouseup', 'mouseleave', 'touchend'].forEach(evt => 
+            btnRight.addEventListener(evt, (e) => { e.preventDefault(); handleBtnPress('right', false); })
+        );
+
+        function startGame() {
+            if (gameRunning) return;
+            gameRunning = true;
+            score = 0;
+            items = [];
+            player.x = canvas.width / 2 - 25; // Center player
+            document.getElementById('scoreDisplay').innerText = "SCORE: 0";
+            requestAnimationFrame(updateGame);
+        }
+
+        function updateGame() {
+            if (!gameRunning) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Move Player
+            if (keys['ArrowLeft'] && player.x > 0) player.x -= 7;
+            if (keys['ArrowRight'] && player.x < canvas.width - player.w) player.x += 7;
+
+            // Draw Player
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+
+            // Spawn Items
+            if (Math.random() < 0.05) {
+                let type = Math.random() > 0.3 ? 'good' : 'bad'; 
+                items.push({
+                    x: Math.random() * (canvas.width - 30),
+                    y: -30,
+                    size: 20,
+                    speed: 3 + Math.random() * 3,
+                    type: type
+                });
+            }
+
+            // Update Items
+            for (let i = 0; i < items.length; i++) {
+                let item = items[i];
+                item.y += item.speed;
+
+                // Draw Item
+                ctx.beginPath();
+                if (item.type === 'good') {
+                    ctx.fillStyle = '#ccff00'; // Neon Green
+                    ctx.arc(item.x + item.size/2, item.y + item.size/2, item.size/2, 0, Math.PI*2);
+                } else {
+                    ctx.fillStyle = '#ff0000'; // Red
+                    ctx.fillRect(item.x, item.y, item.size, item.size);
+                }
+                ctx.fill();
+
+                // Collision
+                if (
+                    player.x < item.x + item.size &&
+                    player.x + player.w > item.x &&
+                    player.y < item.y + item.size &&
+                    player.y + player.h > item.y
+                ) {
+                    if (item.type === 'good') {
+                        score += 10;
+                        document.getElementById('scoreDisplay').innerText = "SCORE: " + score;
+                        items.splice(i, 1);
+                        i--;
+                    } else {
+                        gameRunning = false;
+                        ctx.fillStyle = "white";
+                        ctx.font = "40px Archivo Black";
+                        ctx.fillText("GAME OVER", 180, 200);
+                        ctx.font = "20px Space Grotesk";
+                        ctx.fillText("Final Score: " + score, 230, 240);
+                    }
+                }
+
+                if (item.y > canvas.height) {
+                    items.splice(i, 1);
+                    i--;
+                }
+            }
+
+            if (gameRunning) requestAnimationFrame(updateGame);
+        }
     </script>
 
 </body>
